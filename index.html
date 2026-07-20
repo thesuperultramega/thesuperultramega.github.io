@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>One Lever — Daily Rhythm</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#f9f9f7">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0d0d0d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="One Lever">
+<meta name="robots" content="noindex, nofollow">
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1: #fcfcfb;
+    --page: #f9f9f7;
+    --ink-1: #0b0b0b;
+    --ink-2: #52514e;
+    --muted: #898781;
+    --grid: #e1e0d9;
+    --baseline: #c3c2b7;
+    --border: rgba(11,11,11,0.10);
+    --accent: #2a78d6;
+    --accent-soft: #cde2fb;
+    --good: #0ca30c;
+    --good-text: #006300;
+    --warn: #eda100;
+    --keystone: #4a3aa7;
+    --keystone-soft: #e6e3f7;
+    --game: #e87ba4;
+    --game-soft: #fbe7ef;
+    --gym: #1baf7a;
+    --gym-soft: #d9f3e8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --surface-1: #1a1a19;
+      --page: #0d0d0d;
+      --ink-1: #ffffff;
+      --ink-2: #c3c2b7;
+      --muted: #898781;
+      --grid: #2c2c2a;
+      --baseline: #383835;
+      --border: rgba(255,255,255,0.10);
+      --accent: #3987e5;
+      --accent-soft: #16304f;
+      --good: #0ca30c;
+      --good-text: #0ca30c;
+      --warn: #c98500;
+      --keystone: #9085e9;
+      --keystone-soft: #262149;
+      --game: #d55181;
+      --game-soft: #3a1f2b;
+      --gym: #199e70;
+      --gym-soft: #143128;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-1: #1a1a19;
+    --page: #0d0d0d;
+    --ink-1: #ffffff;
+    --ink-2: #c3c2b7;
+    --muted: #898781;
+    --grid: #2c2c2a;
+    --baseline: #383835;
+    --border: rgba(255,255,255,0.10);
+    --accent: #3987e5;
+    --accent-soft: #16304f;
+    --good: #0ca30c;
+    --good-text: #0ca30c;
+    --warn: #c98500;
+    --keystone: #9085e9;
+    --keystone-soft: #262149;
+    --game: #d55181;
+    --game-soft: #3a1f2b;
+    --gym: #199e70;
+    --gym-soft: #143128;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page);
+    color: var(--ink-1);
+    line-height: 1.45;
+    padding: 24px 16px 64px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+
+  header.top { margin-bottom: 12px; }
+  .date-line { font-size: 13px; color: var(--muted); font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase; }
+  h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin-top: 2px; }
+  .subtitle { color: var(--ink-2); font-size: 14px; margin-top: 4px; }
+
+  /* View tabs */
+  .tabs { display: flex; gap: 4px; margin: 14px 0 10px; border-bottom: 1px solid var(--grid); }
+  .tab-btn {
+    background: none; border: none; cursor: pointer; font-family: inherit;
+    font-size: 14px; font-weight: 600; color: var(--muted);
+    padding: 8px 14px; border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .tab-btn[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-btn:hover { color: var(--ink-1); }
+
+  /* Save bar */
+  .savebar {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 12px; padding: 10px 14px; margin-bottom: 14px;
+    font-size: 12.5px; color: var(--ink-2);
+  }
+  .savebar .dot-ind { width: 9px; height: 9px; border-radius: 50%; background: var(--baseline); flex-shrink: 0; }
+  .savebar.connected .dot-ind { background: var(--good); }
+  .savebar .sb-text { flex: 1; min-width: 180px; }
+  .sb-btn {
+    background: none; border: 1px solid var(--border); border-radius: 8px;
+    color: var(--ink-2); font-size: 12px; padding: 5px 11px; cursor: pointer;
+    font-family: inherit; white-space: nowrap;
+  }
+  .sb-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .sb-btn.primary { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+
+  .modes { display: flex; gap: 8px; margin: 0 0 16px; }
+  .mode-btn {
+    flex: 1; padding: 10px 12px; border-radius: 10px; cursor: pointer;
+    border: 1px solid var(--border); background: var(--surface-1);
+    font-family: inherit; text-align: left; transition: all 0.12s ease;
+  }
+  .mode-btn .m-name { font-size: 14px; font-weight: 700; color: var(--ink-1); }
+  .mode-btn .m-sub { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+  .mode-btn[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+  .mode-btn[aria-pressed="true"] .m-name { color: var(--accent); }
+  @media (max-width: 640px) { .modes { flex-direction: column; } }
+
+  .flex-input {
+    display: block; width: 100%; margin-top: 7px;
+    background: transparent; color: var(--ink-1);
+    border: 1px dashed var(--baseline); border-radius: 8px;
+    padding: 7px 10px; font: inherit; font-size: 13px;
+  }
+  .flex-input::placeholder { color: var(--muted); }
+  .flex-input:focus { outline: none; border-color: var(--accent); border-style: solid; }
+
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  .card h2 {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
+  }
+
+  .keystone-banner {
+    background: var(--keystone-soft);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .keystone-banner .big { font-size: 30px; line-height: 1; }
+  .keystone-banner .kb-title { font-weight: 700; font-size: 15px; color: var(--ink-1); }
+  .keystone-banner .kb-sub { font-size: 13px; color: var(--ink-2); margin-top: 2px; }
+  .kb-time { margin-left: auto; font-size: 22px; font-weight: 700; color: var(--keystone); white-space: nowrap; }
+
+  .block {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 10px 10px; border-radius: 10px; position: relative;
+  }
+  .block + .block { margin-top: 2px; }
+  .block.now { background: var(--accent-soft); }
+  .block.now::before {
+    content: "NOW"; position: absolute; right: 10px; top: 10px;
+    font-size: 10px; font-weight: 800; letter-spacing: 0.08em; color: var(--accent);
+  }
+  .block .t {
+    width: 92px; flex-shrink: 0; font-size: 12px; font-weight: 600; color: var(--muted);
+    font-variant-numeric: tabular-nums; padding-top: 3px;
+  }
+  .block .body { flex: 1; min-width: 0; }
+  .block .name { font-size: 14.5px; font-weight: 600; }
+  .block .note { font-size: 12.5px; color: var(--ink-2); margin-top: 1px; }
+  .tag {
+    display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.05em;
+    padding: 1px 7px; border-radius: 99px; margin-left: 6px; vertical-align: 1px;
+    text-transform: uppercase;
+  }
+  .tag.keystone { background: var(--keystone-soft); color: var(--keystone); }
+  .tag.golden { background: var(--accent-soft); color: var(--accent); }
+  .tag.earned { background: var(--game-soft); color: var(--game); }
+  .tag.gym { background: var(--gym-soft); color: var(--gym); }
+
+  .chk {
+    width: 26px; height: 26px; flex-shrink: 0;
+    border: 2px solid var(--baseline); border-radius: 50%;
+    background: transparent; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 14px; color: transparent;
+    transition: all 0.12s ease; margin-top: 1px;
+  }
+  .chk:hover { border-color: var(--accent); }
+  .chk[aria-checked="true"] { background: var(--good); border-color: var(--good); color: #fff; }
+  .chk-spacer { width: 26px; flex-shrink: 0; }
+
+  .game-status {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px; border-radius: 10px; background: var(--game-soft);
+  }
+  .game-status .icon { font-size: 26px; }
+  .game-status .gs-title { font-weight: 700; font-size: 15px; }
+  .game-status .gs-sub { font-size: 13px; color: var(--ink-2); margin-top: 2px; }
+  .gs-mins { margin-left: auto; text-align: right; }
+  .gs-mins .n { font-size: 28px; font-weight: 700; line-height: 1; }
+  .gs-mins .u { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+
+  .week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+  .day {
+    border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 4px 8px; text-align: center; cursor: pointer;
+    background: transparent; transition: all 0.12s ease;
+    -webkit-user-select: none; user-select: none;
+  }
+  .day:hover { border-color: var(--accent); }
+  .day .dn { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 0.04em; }
+  .day .dot {
+    width: 22px; height: 22px; margin: 8px auto 0; border-radius: 50%;
+    border: 2px solid var(--baseline);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; color: transparent;
+  }
+  .day[data-state="won"] .dot { background: var(--good); border-color: var(--good); color: #fff; }
+  .day[data-state="partial"] .dot { background: var(--warn); border-color: var(--warn); color: #fff; }
+  .day .dl { font-size: 10px; margin-top: 6px; color: var(--muted); font-weight: 600; min-height: 12px; }
+  .week-note { font-size: 12px; color: var(--muted); margin-top: 10px; }
+  .legend { display: flex; gap: 16px; margin-top: 12px; font-size: 12px; color: var(--ink-2); flex-wrap: wrap; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .sw { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .sw.won { background: var(--good); }
+  .sw.partial { background: var(--warn); }
+  .sw.open { border: 2px solid var(--baseline); width: 9px; height: 9px; }
+
+  .ritual { list-style: none; }
+  .ritual li {
+    display: flex; align-items: center; gap: 12px;
+    padding: 9px 6px; border-bottom: 1px solid var(--grid);
+  }
+  .ritual li:last-child { border-bottom: none; }
+  .ritual .r-name { font-size: 14px; font-weight: 500; }
+  .ritual .r-why { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+  /* Stats */
+  .range-row { display: flex; gap: 8px; margin-bottom: 16px; }
+  .range-btn {
+    background: none; border: 1px solid var(--border); border-radius: 99px;
+    color: var(--ink-2); font-size: 12.5px; font-weight: 600; padding: 5px 14px;
+    cursor: pointer; font-family: inherit;
+  }
+  .range-btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px; }
+  .tile {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px;
+  }
+  .tile .tv { font-size: 26px; font-weight: 700; line-height: 1.1; }
+  .tile .tl { font-size: 11.5px; color: var(--muted); font-weight: 600; margin-top: 4px; letter-spacing: 0.03em; text-transform: uppercase; }
+
+  .strip-scroll { overflow-x: auto; padding-bottom: 6px; }
+  .habit-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; }
+  .habit-row .hl { width: 170px; flex-shrink: 0; font-size: 13px; font-weight: 500; }
+  .habit-row .track { flex: 1; height: 14px; background: var(--grid); border-radius: 7px; overflow: hidden; }
+  .habit-row .fill { height: 100%; background: var(--accent); border-radius: 7px; min-width: 2px; }
+  .habit-row .hv { width: 76px; text-align: right; font-size: 12.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .empty-hint { font-size: 13.5px; color: var(--ink-2); padding: 8px 2px; }
+
+  footer { text-align: center; margin-top: 28px; }
+  .principle { font-size: 13px; color: var(--muted); font-style: italic; }
+  .reset-note { font-size: 11.5px; color: var(--muted); margin-top: 10px; }
+  button.linkish {
+    background: none; border: 1px solid var(--border); border-radius: 8px;
+    color: var(--ink-2); font-size: 12px; padding: 6px 12px; cursor: pointer;
+    font-family: inherit; margin-top: 12px;
+  }
+  button.linkish:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="date-line" id="dateLine">—</div>
+    <h1>One Lever</h1>
+    <div class="subtitle">The day starts the night before. Protect one thing — bedtime — and the rest runs itself.</div>
+  </header>
+
+  <div class="savebar" id="savebar">
+    <span class="dot-ind" id="saveDot"></span>
+    <span class="sb-text" id="saveText">Log not connected — check-offs live only in this open page.</span>
+    <button class="sb-btn primary" id="connectBtn">Connect log file</button>
+    <button class="sb-btn" id="downloadBtn">Download log</button>
+    <button class="sb-btn" id="importBtn">Import log</button>
+    <input type="file" id="importInput" accept=".json,.txt" style="display:none">
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab-btn" id="tabToday" role="tab" aria-selected="true">Today</button>
+    <button class="tab-btn" id="tabStats" role="tab" aria-selected="false">Stats</button>
+  </div>
+
+  <div id="todayView">
+    <div class="modes" role="group" aria-label="Day mode">
+      <button class="mode-btn" id="modeWeekday" aria-pressed="true">
+        <div class="m-name">⚙️ Weekday engine</div>
+        <div class="m-sub">Mornings make. Evenings train. 9 PM lights out.</div>
+      </button>
+      <button class="mode-btn" id="modeSurge" aria-pressed="false">
+        <div class="m-name">⚡ Saturday</div>
+        <div class="m-sub">Surge if it's earned — free day if not.</div>
+      </button>
+      <button class="mode-btn" id="modeSunday" aria-pressed="false">
+        <div class="m-name">🛒 Sunday reset</div>
+        <div class="m-sub">Errands + lunches by noon. Launch Monday tonight.</div>
+      </button>
+    </div>
+
+    <div class="keystone-banner">
+      <div class="big" id="kbIcon">🔑</div>
+      <div>
+        <div class="kb-title" id="kbTitle">Asleep by 9:00 PM</div>
+        <div class="kb-sub" id="kbSub">The only non-negotiable. Everything below is downstream of this.</div>
+      </div>
+      <div class="kb-time" id="countdown"></div>
+    </div>
+
+    <div class="card">
+      <h2 id="tlTitle">Today's Rhythm</h2>
+      <div id="timeline"></div>
+    </div>
+
+    <div class="card" id="gameCard">
+      <h2>Game Time — Earned, Then Walled</h2>
+      <div class="game-status" id="gameStatus">
+        <div class="icon" id="gsIcon">🎮</div>
+        <div>
+          <div class="gs-title" id="gsTitle"></div>
+          <div class="gs-sub" id="gsSub"></div>
+        </div>
+        <div class="gs-mins">
+          <div class="n" id="gsMins">20</div>
+          <div class="u">min tonight</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>This Week</h2>
+      <div class="week" id="week"></div>
+      <div class="legend">
+        <span><span class="sw won"></span> Day won</span>
+        <span><span class="sw partial"></span> Partial (slept right, missed a block)</span>
+        <span><span class="sw open"></span> Open</span>
+      </div>
+      <div class="week-note">Tap a day to cycle it. Aim for 4–5 wins a week — not 7. Rest days aren't failures; they're what makes week 12 possible.</div>
+    </div>
+
+    <div class="card">
+      <h2 id="ritualTitle">Shutdown Ritual — 8:15 PM (hand the baton to 4:30-AM-you)</h2>
+      <ul class="ritual" id="ritual"></ul>
+    </div>
+  </div>
+
+  <div id="statsView" style="display:none">
+    <div class="range-row" role="group" aria-label="Stats range">
+      <button class="range-btn" data-range="7" aria-pressed="false">7 days</button>
+      <button class="range-btn" data-range="30" aria-pressed="true">30 days</button>
+      <button class="range-btn" data-range="90" aria-pressed="false">90 days</button>
+    </div>
+
+    <div class="tiles" id="tiles"></div>
+
+    <div class="card">
+      <h2>Day Outcomes</h2>
+      <div class="strip-scroll" id="stripWrap"></div>
+      <div class="legend">
+        <span><span class="sw won"></span> Won (✓)</span>
+        <span><span class="sw partial"></span> Partial (–)</span>
+        <span><span class="sw open"></span> Missed / no data (·)</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Habit Completion</h2>
+      <div id="habitBars"></div>
+    </div>
+
+    <div class="card">
+      <h2>Ask Claude</h2>
+      <div class="empty-hint">Keep your log file (<b>one-lever-log.json</b>) in a folder connected to Claude, and you can say <i>"load up my stats for the last month"</i> — Claude will read the file and give you the full report, trends and all.</div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="principle" id="principle">"The couch is the gravity well. Never go home first — the gym is just the next stop on the commute."</div>
+    <button class="linkish" id="copyBtn">Copy today's log</button>
+    <div class="reset-note" id="resetNote">Everything saves automatically on this device. Use "Download log" for a backup — or to hand Claude your data for a monthly stats report.</div>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var MODES = {
+    weekday: {
+      keystone: { icon: "🔑", title: "Asleep by 9:00 PM", sub: "The only non-negotiable. Everything below is downstream of this." },
+      tlTitle: "Weekday Rhythm",
+      blocks: [
+        { start: "21:00", end: "04:30", label: "9:00 PM", name: "Lights out", note: "Sleep is the performance enhancer. 7½ hours.", tag: "keystone", check: "sleep", checkLabel: "In bed by 9 last night" },
+        { start: "04:30", end: "04:45", label: "4:30 AM", name: "Wake — no snooze, no phone", note: "Water, lights on, sit down at the project fast.", check: "wake" },
+        { start: "04:45", end: "06:45", label: "4:45 AM", name: "Project block — 2 full hours", note: "The 3-AM feeling, on 7½ hours of sleep. It's already open from last night — just sit down.", tag: "golden", check: "project" },
+        { start: "06:45", end: "07:25", label: "6:45 AM", name: "Get ready", note: "" },
+        { start: "07:25", end: "08:00", label: "7:30 AM", name: "Commute", note: "" },
+        { start: "08:00", end: "17:00", label: "8–5", name: "Work", note: "Two hours already banked before anyone else was awake." },
+        { start: "17:00", end: "18:15", label: "5:15 PM", name: "Gym — straight from work", note: "NEVER go home first. Bag's already in the car. This is the motivation hack: it's not a decision, it's the next stop.", tag: "gym", check: "gym", checkLabel: "Gym done, no home-first detour" },
+        { start: "18:15", end: "18:45", label: "6:15 PM", name: "Commute home", note: "Arriving showered, trained, and done — not collapsing." },
+        { start: "18:45", end: "19:30", label: "6:45 PM", name: "Dinner", note: "" },
+        { start: "19:30", end: "20:15", label: "7:30 PM", name: "Game window", note: "Guilt-free because it has walls. Hard stop at 8:15.", tag: "earned", check: "gamestop", checkLabel: "Stopped on time" },
+        { start: "20:15", end: "21:00", label: "8:15 PM", name: "Shutdown ritual + wind down", note: "Run the checklist below. Screens dim, lights low." }
+      ],
+      ritualTitle: "Shutdown Ritual — 8:15 PM (hand the baton to 4:30-AM-you)",
+      ritual: [
+        { name: "Gym bag packed and in the car", why: "Tomorrow's 5:15 PM decision, already made." },
+        { name: "Game fully logged out, controller in the drawer", why: "Tomorrow's friction, placed tonight." },
+        { name: "Project left open with the next step written down", why: "Starting is the hard part — remove it." },
+        { name: "Phone on charger, out of reach of the bed", why: "The scroll can't eat what it can't reach." },
+        { name: "Lights low by 8:30", why: "Melatonin does the bedtime discipline for you." }
+      ],
+      principle: "\"The couch is the gravity well. Never go home first — the gym is just the next stop on the commute.\"",
+      game: {
+        wonWhen: ["project", "gym"],
+        won: { icon: "🏆", title: "Day won — full window unlocked", sub: "7:30–8:15 PM, zero guilt. Project banked this morning, gym banked tonight. Hard stop at 8:15 still applies.", mins: "45" },
+        locked: { icon: "🎮", title: "Locked until the day is won", sub: "Check off Project block + Gym above to unlock the full window. Missed one = 20-minute cap tonight.", mins: "20" }
+      }
+    },
+    surge: {
+      keystone: { icon: "⚡", title: "Surge is earned Friday night: asleep by 8:00 PM", sub: "No Friday 8 PM, no Saturday 3 AM. That's the whole deal — the surge runs on sleep, not willpower." },
+      tlTitle: "Saturday Surge",
+      blocks: [
+        { start: "20:00", end: "03:00", label: "FRI 8 PM", name: "Lights out (Friday)", note: "The surge's entry fee. 7 hours banked before the big morning.", tag: "keystone", check: "sleep", checkLabel: "In bed by 8 PM Friday" },
+        { start: "03:00", end: "03:20", label: "3:00 AM", name: "Wake — the good kind of 3 AM", note: "Coffee on, world silent, nowhere to be at 8.", check: "wake" },
+        { start: "03:20", end: "08:00", label: "3:20 AM", name: "Deep project session — 4½ hours", note: "The marathon block. Break every 90 minutes. This is what the whole week protected.", tag: "golden", check: "project", checkLabel: "Surge session done" },
+        { start: "08:00", end: "09:00", label: "8:00 AM", name: "Big breakfast + walk", note: "You've done a full day's deep work and the day hasn't started." },
+        { start: "09:00", end: "13:00", label: "9:00 AM", name: "Life — errands, people, whatever", note: "Zero productivity guilt. It's banked." },
+        { start: "13:00", end: "14:00", label: "1:00 PM", name: "Nap (20–90 min)", note: "Not optional decoration — this is part of the surge's engineering.", check: "nap", checkLabel: "Napped" },
+        { start: "14:00", end: "20:00", label: "2:00 PM", name: "Free — game freely, see people, rest", note: "Open gaming is fine today. It lives in daylight, not against your sleep.", flex: true, flexHint: "Optional: claim this block for something (a project, people, nothing) — or leave it open." },
+        { start: "20:00", end: "21:00", label: "8:00 PM", name: "Wind down", note: "Back on the rails: asleep by 9 so Sunday is normal and Monday's 4:30 works.", check: "gamestop", checkLabel: "Screens off by 8:30, asleep by 9" }
+      ],
+      ritualTitle: "Surge Rules (read Friday afternoon)",
+      ritual: [
+        { name: "Friday: no game window at all — 8 PM is the bedtime", why: "One evening traded for the best morning of the week." },
+        { name: "Surge is max once a week", why: "Twice is how the two-week collapse starts again." },
+        { name: "Project staged Friday: files open, next step written", why: "3 AM you should only have to sit down." },
+        { name: "If Friday bedtime slips past 9, the surge is cancelled — sleep in instead", why: "A surge on short sleep is just the old debt cycle wearing a costume." },
+        { name: "Saturday nap is mandatory, not lazy", why: "It's how you land the plane without wrecking Sunday." }
+      ],
+      principle: "\"The surge isn't stolen from sleep anymore — it's purchased with Friday night. That's why this one doesn't collapse.\"",
+      game: {
+        wonWhen: ["sleep", "project"],
+        won: { icon: "🏆", title: "Surge complete — the afternoon is yours", sub: "Game freely from 2 PM. No cap today — the walls are the 8:30 screens-off, not a timer.", mins: "∞" },
+        locked: { icon: "🎮", title: "Open afternoon — earned by the morning", sub: "Check off Friday's 8 PM bedtime + the surge session. If the surge didn't happen, treat it like a normal rest day: game in daylight, screens off 8:30.", mins: "—" }
+      }
+    },
+    sunday: {
+      keystone: { icon: "🚀", title: "Asleep by 9:00 PM — the week's most important bedtime", sub: "Tonight isn't the end of the weekend. It's the launch of Monday's 4:30." },
+      tlTitle: "Sunday Reset",
+      blocks: [
+        { start: "07:30", end: "08:30", label: "~7:30 AM", name: "Wake easy — no alarm panic", note: "Sleep in a little, but keep it within an hour of the weekday rhythm. Past 9 and Monday's 4:30 gets expensive.", check: "wake", checkLabel: "Up by ~8:30" },
+        { start: "08:30", end: "11:00", label: "8:30 AM", name: "Errands + grocery run", note: "Stores are empty in the morning. Knock out the week's list while everyone else sleeps in.", check: "errands", checkLabel: "Errands + groceries done" },
+        { start: "11:00", end: "12:30", label: "11:00 AM", name: "Lunch prep for the week", note: "Five lunches in the fridge = five good decisions already made, and lunch money staying in your pocket all week.", tag: "golden", check: "prep", checkLabel: "Week's lunches prepped" },
+        { start: "12:30", end: "14:00", label: "12:30 PM", name: "Lunch + downtime", note: "" },
+        { start: "14:00", end: "18:00", label: "2:00 PM", name: "Flex block — yours, no schedule", note: "Projects if the pull is there, gaming in daylight, people, rest. By 2 PM the week is already handled — this time is clean.", flex: true, flexHint: "Optional: claim this block for something — or leave it open." },
+        { start: "18:00", end: "19:00", label: "6:00 PM", name: "Dinner", note: "" },
+        { start: "19:00", end: "20:15", label: "7:00 PM", name: "Easy evening", note: "Game window's fine here if the morning happened. Hard stop 8:15.", check: "gamestop", checkLabel: "Screens winding down by 8:15" },
+        { start: "20:15", end: "21:00", label: "8:15 PM", name: "Monday launch ritual", note: "The most leveraged 45 minutes of the week — run the checklist below." }
+      ],
+      ritualTitle: "Monday Launch Ritual — 8:15 PM Sunday",
+      ritual: [
+        { name: "Gym bag packed and in the car", why: "Monday's 5:15 PM decision, already made." },
+        { name: "Monday's lunch grab-and-go in the fridge", why: "You already did this at 11 AM — just confirm it." },
+        { name: "Project staged: files open, next step written down", why: "Monday 4:45-AM-you only has to sit down." },
+        { name: "Game logged out, controller in the drawer", why: "Monday's friction, placed tonight." },
+        { name: "Phone on charger, lights low by 8:30", why: "The launch is the bedtime. Everything else is detail." }
+      ],
+      principle: "\"Sunday morning buys the whole week: lunches made once, errands gone, Monday staged. By 2 PM you're free — actually free, not avoiding-something free.\"",
+      game: {
+        wonWhen: ["errands", "prep"],
+        won: { icon: "🏆", title: "Week launched — the rest of Sunday is yours", sub: "Errands done, lunches banked. Game, build, or rest guilt-free — just keep the 8:15 wind-down.", mins: "∞" },
+        locked: { icon: "🛒", title: "Morning first, then freedom", sub: "Knock out errands + lunch prep before noon and the entire rest of the day is clean, unscheduled time.", mins: "—" }
+      }
+    }
+  };
+
+  var HABITS = [
+    { key: "sleep",    label: "Bedtime kept",         modes: ["weekday", "surge"] },
+    { key: "wake",     label: "Woke on time",         modes: ["weekday", "surge", "sunday"] },
+    { key: "project",  label: "Project block",        modes: ["weekday", "surge"] },
+    { key: "gym",      label: "Gym (no home first)",  modes: ["weekday"] },
+    { key: "gamestop", label: "Game hard stop",       modes: ["weekday", "surge", "sunday"] },
+    { key: "errands",  label: "Errands + groceries",  modes: ["sunday"] },
+    { key: "prep",     label: "Lunch prep",           modes: ["sunday"] }
+  ];
+
+  var mode = "weekday";
+  var stateByMode = {};
+  var ritualByMode = {};
+  var state = {};
+  var ritualState = [];
+  var flexVals = {};
+  var weekState = ["open","open","open","open","open","open","open"];
+  var DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+  var STATES = ["open","won","partial"];
+  var statsRange = 30;
+  var fileHandle = null;
+  var log = { version: 1, days: {} };
+
+  // On-device storage (guarded — silently skipped in environments that block it)
+  var LS_KEY = "one-lever-log";
+  var hasLS = (function () {
+    try {
+      var t = "__ol_test__";
+      window.localStorage.setItem(t, t);
+      window.localStorage.removeItem(t);
+      return true;
+    } catch (e) { return false; }
+  })();
+
+  function dateKey(d) {
+    var y = d.getFullYear(), m = ("0" + (d.getMonth() + 1)).slice(-2), dd = ("0" + d.getDate()).slice(-2);
+    return y + "-" + m + "-" + dd;
+  }
+  function naturalModeFor(d) {
+    var wd = d.getDay();
+    return wd === 6 ? "surge" : wd === 0 ? "sunday" : "weekday";
+  }
+  function mondayOf(d) {
+    var c = new Date(d); c.setDate(c.getDate() - ((c.getDay() + 6) % 7)); return dateKey(c);
+  }
+
+  var now = new Date();
+  var TODAY = dateKey(now);
+  document.getElementById("dateLine").textContent = now.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+  mode = naturalModeFor(now);
+
+  function toMin(hhmm) {
+    var p = hhmm.split(":");
+    return parseInt(p[0], 10) * 60 + parseInt(p[1], 10);
+  }
+  function isNow(b) {
+    var n = new Date();
+    var cur = n.getHours() * 60 + n.getMinutes();
+    var s = toMin(b.start), e = toMin(b.end);
+    if (s <= e) return cur >= s && cur < e;
+    return cur >= s || cur < e;
+  }
+
+  function updateCountdown() {
+    var n = new Date();
+    var bed = new Date(n); bed.setHours(21, 0, 0, 0);
+    var el = document.getElementById("countdown");
+    var diff = bed - n;
+    if (diff > 0 && diff < 12 * 3600 * 1000) {
+      var h = Math.floor(diff / 3600000), m = Math.floor((diff % 3600000) / 60000);
+      el.textContent = (h > 0 ? h + "h " : "") + m + "m left";
+    } else {
+      el.textContent = "9:00 PM";
+    }
+  }
+  updateCountdown();
+  setInterval(updateCountdown, 30000);
+
+  /* ---------- Persistence ---------- */
+
+  function outcomeFor(dayRec) {
+    var m = dayRec.mode || "weekday";
+    var cfg = MODES[m]; if (!cfg) return "missed";
+    var checks = (dayRec.checks && dayRec.checks[m]) || {};
+    var required = cfg.game.wonWhen;
+    var allWon = required.every(function (k) { return checks[k]; });
+    if (allWon) return "won";
+    var any = Object.keys(checks).some(function (k) { return checks[k]; });
+    return any ? "partial" : "missed";
+  }
+
+  function snapshotToday() {
+    var rec = {
+      date: TODAY,
+      mode: mode, // the mode you actually ran today, not just what the calendar says
+      checks: JSON.parse(JSON.stringify(stateByMode)),
+      rituals: {},
+      flex: {},
+      week: { monday: mondayOf(now), states: weekState.slice() },
+      savedAt: new Date().toISOString()
+    };
+    Object.keys(ritualByMode).forEach(function (m) {
+      rec.rituals[m] = ritualByMode[m].slice();
+    });
+    Object.keys(flexVals).forEach(function (k) { if (flexVals[k]) rec.flex[k] = flexVals[k]; });
+    rec.outcome = outcomeFor(rec);
+    return rec;
+  }
+
+  var saveTimer = null;
+  function scheduleSave() {
+    log.days[TODAY] = snapshotToday();
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(writeLog, 600);
+  }
+
+  function setSaveStatus(connected, msg) {
+    var bar = document.getElementById("savebar");
+    bar.classList.toggle("connected", !!connected);
+    document.getElementById("saveText").textContent = msg;
+  }
+
+  function writeLog() {
+    if (hasLS) {
+      try {
+        window.localStorage.setItem(LS_KEY, JSON.stringify(log));
+        if (!fileHandle) {
+          var t = new Date();
+          setSaveStatus(true, "Auto-saved on this device " + t.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }) + " — your data never leaves your phone.");
+        }
+      } catch (e) { /* storage full or blocked — file/download paths still work */ }
+    }
+    if (!fileHandle) return;
+    fileHandle.createWritable().then(function (w) {
+      return w.write(JSON.stringify(log, null, 2)).then(function () { return w.close(); });
+    }).then(function () {
+      var n = new Date();
+      setSaveStatus(true, "Auto-saved " + n.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }) + " → " + (fileHandle.name || "log file"));
+    }).catch(function () {
+      setSaveStatus(false, "Save failed — file permission may have expired. Click Connect again.");
+    });
+  }
+
+  function absorbLog(parsed) {
+    if (!parsed || typeof parsed !== "object" || !parsed.days) return false;
+    Object.keys(parsed.days).forEach(function (k) {
+      if (!log.days[k] || k !== TODAY) log.days[k] = parsed.days[k];
+    });
+    var todayRec = parsed.days[TODAY];
+    if (todayRec) {
+      stateByMode = todayRec.checks || {};
+      ritualByMode = todayRec.rituals || {};
+      flexVals = todayRec.flex || {};
+      if (todayRec.week && todayRec.week.monday === mondayOf(now) && Array.isArray(todayRec.week.states)) {
+        weekState = todayRec.week.states.slice();
+        refreshWeekGrid();
+      }
+      log.days[TODAY] = todayRec;
+    } else {
+      // restore this week's grid from the most recent record in the same week
+      var keys = Object.keys(parsed.days).sort();
+      for (var i = keys.length - 1; i >= 0; i--) {
+        var r = parsed.days[keys[i]];
+        if (r.week && r.week.monday === mondayOf(now) && Array.isArray(r.week.states)) {
+          weekState = r.week.states.slice();
+          refreshWeekGrid();
+          break;
+        }
+      }
+    }
+    return true;
+  }
+
+  var connectBtn = document.getElementById("connectBtn");
+  if (typeof window.showSaveFilePicker !== "function") {
+    connectBtn.style.display = "none";
+    if (!hasLS) setSaveStatus(false, "This view can't save between visits — use Download log to save and Import log to restore.");
+  }
+  if (hasLS) {
+    setSaveStatus(true, "Auto-saving on this device — your data never leaves your phone. Download log anytime for a backup or a Claude stats report.");
+  }
+  connectBtn.addEventListener("click", function () {
+    var pick;
+    if (typeof window.showOpenFilePicker === "function") {
+      pick = window.showOpenFilePicker({
+        types: [{ description: "One Lever log", accept: { "application/json": [".json"] } }],
+        multiple: false
+      }).then(function (hs) { return hs[0]; }).catch(function (e) {
+        if (e && e.name === "AbortError") {
+          // user cancelled open — offer to create a new one
+          return window.showSaveFilePicker({ suggestedName: "one-lever-log.json",
+            types: [{ description: "One Lever log", accept: { "application/json": [".json"] } }] });
+        }
+        throw e;
+      });
+    } else {
+      pick = window.showSaveFilePicker({ suggestedName: "one-lever-log.json",
+        types: [{ description: "One Lever log", accept: { "application/json": [".json"] } }] });
+    }
+    pick.then(function (h) {
+      fileHandle = h;
+      return h.getFile().then(function (f) { return f.text(); }).then(function (txt) {
+        if (txt && txt.trim()) {
+          try { absorbLog(JSON.parse(txt)); } catch (e) { /* fresh or corrupt file — start clean */ }
+        }
+        render();
+        scheduleSave();
+        setSaveStatus(true, "Connected to " + (h.name || "log file") + " — auto-saving every change.");
+      });
+    }).catch(function (e) {
+      if (!e || e.name !== "AbortError") setSaveStatus(false, "Couldn't connect the log file. You can still Download / Import.");
+    });
+  });
+
+  document.getElementById("downloadBtn").addEventListener("click", function () {
+    log.days[TODAY] = snapshotToday();
+    var blob = new Blob([JSON.stringify(log, null, 2)], { type: "application/json" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "one-lever-log.json";
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  });
+
+  document.getElementById("importBtn").addEventListener("click", function () {
+    document.getElementById("importInput").click();
+  });
+  document.getElementById("importInput").addEventListener("change", function () {
+    var f = this.files && this.files[0];
+    if (!f) return;
+    f.text().then(function (txt) {
+      try {
+        if (absorbLog(JSON.parse(txt))) {
+          render(); renderStats();
+          setSaveStatus(!!fileHandle, "Imported " + f.name + " — " + Object.keys(log.days).length + " days of history loaded.");
+        }
+      } catch (e) {
+        setSaveStatus(!!fileHandle, "That file didn't look like a One Lever log.");
+      }
+    });
+  });
+
+  /* ---------- Today view ---------- */
+
+  function updateGame() {
+    var cfg = MODES[mode].game;
+    var won = cfg.wonWhen.every(function (k) { return state[k]; });
+    var v = won ? cfg.won : cfg.locked;
+    document.getElementById("gsIcon").textContent = v.icon;
+    document.getElementById("gsTitle").textContent = v.title;
+    document.getElementById("gsSub").textContent = v.sub;
+    document.getElementById("gsMins").textContent = v.mins;
+  }
+
+  function render() {
+    var cfg = MODES[mode];
+    if (!stateByMode[mode]) stateByMode[mode] = {};
+    state = stateByMode[mode];
+    if (!ritualByMode[mode]) ritualByMode[mode] = cfg.ritual.map(function () { return false; });
+    if (ritualByMode[mode].length !== cfg.ritual.length) ritualByMode[mode] = cfg.ritual.map(function () { return false; });
+    ritualState = ritualByMode[mode];
+
+    document.getElementById("modeWeekday").setAttribute("aria-pressed", String(mode === "weekday"));
+    document.getElementById("modeSurge").setAttribute("aria-pressed", String(mode === "surge"));
+    document.getElementById("modeSunday").setAttribute("aria-pressed", String(mode === "sunday"));
+    document.getElementById("kbIcon").textContent = cfg.keystone.icon;
+    document.getElementById("kbTitle").textContent = cfg.keystone.title;
+    document.getElementById("kbSub").textContent = cfg.keystone.sub;
+    document.getElementById("tlTitle").textContent = cfg.tlTitle;
+    document.getElementById("ritualTitle").textContent = cfg.ritualTitle;
+    document.getElementById("principle").textContent = cfg.principle;
+
+    var tl = document.getElementById("timeline");
+    tl.textContent = "";
+    cfg.blocks.forEach(function (b, bi) {
+      var row = document.createElement("div");
+      row.className = "block" + (isNow(b) ? " now" : "");
+      var t = document.createElement("div"); t.className = "t"; t.textContent = b.label;
+      var body = document.createElement("div"); body.className = "body";
+      var nm = document.createElement("div"); nm.className = "name"; nm.textContent = b.name;
+      if (b.tag) {
+        var tg = document.createElement("span");
+        tg.className = "tag " + b.tag;
+        tg.textContent = b.tag === "keystone" ? "Keystone" : b.tag === "golden" ? "Golden window" : b.tag === "gym" ? "No home first" : "Earned";
+        nm.appendChild(tg);
+      }
+      body.appendChild(nm);
+      if (b.note) { var nt = document.createElement("div"); nt.className = "note"; nt.textContent = b.note; body.appendChild(nt); }
+      if (b.flex) {
+        var fkey = mode + ":" + bi;
+        var inp = document.createElement("input");
+        inp.type = "text";
+        inp.className = "flex-input";
+        inp.placeholder = b.flexHint || "Optional: what's this block for today?";
+        inp.setAttribute("aria-label", "Plan for " + b.name);
+        inp.value = flexVals[fkey] || "";
+        inp.addEventListener("input", function () { flexVals[fkey] = inp.value; scheduleSave(); });
+        body.appendChild(inp);
+      }
+      var chk;
+      if (b.check) {
+        chk = document.createElement("button");
+        chk.className = "chk";
+        chk.setAttribute("role", "checkbox");
+        chk.setAttribute("aria-checked", String(!!state[b.check]));
+        chk.setAttribute("aria-label", b.checkLabel || b.name);
+        chk.title = b.checkLabel || ("Done: " + b.name);
+        chk.textContent = "✓";
+        chk.addEventListener("click", function () {
+          state[b.check] = !state[b.check];
+          chk.setAttribute("aria-checked", String(!!state[b.check]));
+          updateGame();
+          scheduleSave();
+        });
+      } else {
+        chk = document.createElement("div");
+        chk.className = "chk-spacer";
+      }
+      row.appendChild(chk);
+      row.appendChild(t);
+      row.appendChild(body);
+      tl.appendChild(row);
+    });
+
+    var ritualEl = document.getElementById("ritual");
+    ritualEl.textContent = "";
+    cfg.ritual.forEach(function (r, i) {
+      var li = document.createElement("li");
+      var chk = document.createElement("button");
+      chk.className = "chk";
+      chk.setAttribute("role", "checkbox");
+      chk.setAttribute("aria-checked", String(!!ritualState[i]));
+      chk.setAttribute("aria-label", r.name);
+      chk.textContent = "✓";
+      chk.addEventListener("click", function () {
+        ritualState[i] = !ritualState[i];
+        chk.setAttribute("aria-checked", String(ritualState[i]));
+        scheduleSave();
+      });
+      var body = document.createElement("div");
+      var nm = document.createElement("div"); nm.className = "r-name"; nm.textContent = r.name;
+      var why = document.createElement("div"); why.className = "r-why"; why.textContent = r.why;
+      body.appendChild(nm); body.appendChild(why);
+      li.appendChild(chk); li.appendChild(body);
+      ritualEl.appendChild(li);
+    });
+
+    updateGame();
+  }
+
+  document.getElementById("modeWeekday").addEventListener("click", function () { mode = "weekday"; render(); });
+  document.getElementById("modeSurge").addEventListener("click", function () { mode = "surge"; render(); });
+  document.getElementById("modeSunday").addEventListener("click", function () { mode = "sunday"; render(); });
+
+  /* ---------- Week grid ---------- */
+
+  var weekCells = [];
+  var weekEl = document.getElementById("week");
+  var todayIdx = (now.getDay() + 6) % 7;
+  DAYS.forEach(function (d, i) {
+    var cell = document.createElement("button");
+    cell.className = "day";
+    cell.setAttribute("data-state", "open");
+    cell.setAttribute("aria-label", d + ": open. Tap to cycle: won, partial, open.");
+    var dn = document.createElement("div"); dn.className = "dn"; dn.textContent = d;
+    var dot = document.createElement("div"); dot.className = "dot"; dot.textContent = "✓";
+    var dl = document.createElement("div"); dl.className = "dl";
+    dl.textContent = i === todayIdx ? "today" : (i === 5 ? "surge" : (i === 6 ? "reset" : ""));
+    cell.appendChild(dn); cell.appendChild(dot); cell.appendChild(dl);
+    cell.addEventListener("click", function () {
+      var cur = STATES.indexOf(weekState[i]);
+      weekState[i] = STATES[(cur + 1) % STATES.length];
+      applyWeekCell(i);
+      scheduleSave();
+    });
+    weekEl.appendChild(cell);
+    weekCells.push({ cell: cell, dot: dot, name: d });
+  });
+  function applyWeekCell(i) {
+    var w = weekCells[i];
+    w.cell.setAttribute("data-state", weekState[i]);
+    w.dot.textContent = weekState[i] === "partial" ? "–" : "✓";
+    w.cell.setAttribute("aria-label", w.name + ": " + weekState[i]);
+  }
+  function refreshWeekGrid() { weekState.forEach(function (_, i) { applyWeekCell(i); }); }
+
+  /* ---------- Stats view ---------- */
+
+  function recordsInRange(nDays) {
+    var out = [];
+    for (var i = nDays - 1; i >= 0; i--) {
+      var d = new Date(now); d.setDate(d.getDate() - i);
+      var k = dateKey(d);
+      var rec = log.days[k] || null;
+      out.push({ date: k, dayLetter: "SMTWTFS"[d.getDay()], dow: d.getDay(), rec: rec, dObj: new Date(d) });
+    }
+    return out;
+  }
+
+  function renderStats() {
+    var rows = recordsInRange(statsRange);
+    var withData = rows.filter(function (r) { return r.rec; });
+    var wins = withData.filter(function (r) { return r.rec.outcome === "won"; }).length;
+    var partials = withData.filter(function (r) { return r.rec.outcome === "partial"; }).length;
+    var surges = withData.filter(function (r) { return r.rec.mode === "surge" && r.rec.outcome === "won"; }).length;
+    var rate = withData.length ? Math.round(100 * wins / withData.length) : 0;
+
+    // streak: consecutive days ending today (or yesterday) with won/partial
+    var streak = 0;
+    for (var i = rows.length - 1; i >= 0; i--) {
+      var r = rows[i];
+      if (i === rows.length - 1 && !r.rec) continue; // today may not be logged yet
+      if (r.rec && (r.rec.outcome === "won" || r.rec.outcome === "partial")) streak++;
+      else break;
+    }
+
+    var tiles = [
+      { v: wins, l: "Days won" },
+      { v: rate + "%", l: "Win rate (logged days)" },
+      { v: streak, l: "Current streak" },
+      { v: surges, l: "Surge Saturdays" }
+    ];
+    var tilesEl = document.getElementById("tiles");
+    tilesEl.textContent = "";
+    tiles.forEach(function (t) {
+      var el = document.createElement("div"); el.className = "tile";
+      var tv = document.createElement("div"); tv.className = "tv"; tv.textContent = t.v;
+      var tl = document.createElement("div"); tl.className = "tl"; tl.textContent = t.l;
+      el.appendChild(tv); el.appendChild(tl); tilesEl.appendChild(el);
+    });
+
+    // Outcome strip (SVG)
+    var wrap = document.getElementById("stripWrap");
+    wrap.textContent = "";
+    if (!withData.length) {
+      var hint = document.createElement("div");
+      hint.className = "empty-hint";
+      hint.textContent = "No logged days yet. Connect or import your log file, or just start checking things off today — the chart fills in as you go.";
+      wrap.appendChild(hint);
+    } else {
+      var cw = 16, gap = 4, H = 88, barH = 44, top = 10;
+      var W = rows.length * (cw + gap);
+      var svgNS = "http://www.w3.org/2000/svg";
+      var svg = document.createElementNS(svgNS, "svg");
+      svg.setAttribute("width", W); svg.setAttribute("height", H);
+      svg.setAttribute("role", "img");
+      svg.setAttribute("aria-label", "Day outcomes for the last " + statsRange + " days");
+      var cs = getComputedStyle(document.documentElement);
+      var cGood = cs.getPropertyValue("--good").trim();
+      var cWarn = cs.getPropertyValue("--warn").trim();
+      var cBase = cs.getPropertyValue("--baseline").trim();
+      var cMuted = cs.getPropertyValue("--muted").trim();
+      rows.forEach(function (r, i) {
+        var x = i * (cw + gap);
+        var outcome = r.rec ? r.rec.outcome : "none";
+        var rect = document.createElementNS(svgNS, "rect");
+        rect.setAttribute("x", x); rect.setAttribute("y", top);
+        rect.setAttribute("width", cw); rect.setAttribute("rx", 4);
+        if (outcome === "won") { rect.setAttribute("height", barH); rect.setAttribute("fill", cGood); }
+        else if (outcome === "partial") { rect.setAttribute("height", Math.round(barH * 0.55)); rect.setAttribute("y", top + barH - Math.round(barH * 0.55)); rect.setAttribute("fill", cWarn); }
+        else { rect.setAttribute("height", 6); rect.setAttribute("y", top + barH - 6); rect.setAttribute("fill", "none"); rect.setAttribute("stroke", cBase); rect.setAttribute("stroke-width", "1.5"); }
+        var title = document.createElementNS(svgNS, "title");
+        title.textContent = r.date + " — " + (r.rec ? (r.rec.outcome + " (" + r.rec.mode + ")") : "no data");
+        rect.appendChild(title);
+        svg.appendChild(rect);
+        var lbl = document.createElementNS(svgNS, "text");
+        lbl.setAttribute("x", x + cw / 2); lbl.setAttribute("y", H - 18);
+        lbl.setAttribute("text-anchor", "middle"); lbl.setAttribute("font-size", "9");
+        lbl.setAttribute("fill", cMuted);
+        lbl.setAttribute("font-family", "system-ui, sans-serif");
+        lbl.textContent = r.dayLetter;
+        svg.appendChild(lbl);
+        if (r.dObj.getDate() === 1 || i === 0) {
+          var ml = document.createElementNS(svgNS, "text");
+          ml.setAttribute("x", x); ml.setAttribute("y", H - 4);
+          ml.setAttribute("font-size", "9"); ml.setAttribute("fill", cMuted);
+          ml.setAttribute("font-family", "system-ui, sans-serif");
+          ml.textContent = r.dObj.toLocaleDateString(undefined, { month: "short" });
+          svg.appendChild(ml);
+        }
+      });
+      wrap.appendChild(svg);
+    }
+
+    // Habit bars
+    var hb = document.getElementById("habitBars");
+    hb.textContent = "";
+    if (!withData.length) {
+      var h2 = document.createElement("div");
+      h2.className = "empty-hint";
+      h2.textContent = "Habit percentages appear once there's at least one logged day.";
+      hb.appendChild(h2);
+    } else {
+      HABITS.forEach(function (h) {
+        var applicable = withData.filter(function (r) { return h.modes.indexOf(r.rec.mode) !== -1; });
+        if (!applicable.length) return;
+        var done = applicable.filter(function (r) {
+          var c = r.rec.checks && r.rec.checks[r.rec.mode];
+          return c && c[h.key];
+        }).length;
+        var pct = Math.round(100 * done / applicable.length);
+        var row = document.createElement("div"); row.className = "habit-row";
+        var hl = document.createElement("div"); hl.className = "hl"; hl.textContent = h.label;
+        var track = document.createElement("div"); track.className = "track";
+        var fill = document.createElement("div"); fill.className = "fill"; fill.style.width = pct + "%";
+        track.appendChild(fill);
+        var hv = document.createElement("div"); hv.className = "hv"; hv.textContent = done + "/" + applicable.length + " · " + pct + "%";
+        row.appendChild(hl); row.appendChild(track); row.appendChild(hv);
+        hb.appendChild(row);
+      });
+    }
+  }
+
+  /* ---------- Tabs ---------- */
+
+  var tabToday = document.getElementById("tabToday");
+  var tabStats = document.getElementById("tabStats");
+  function showTab(which) {
+    var today = which === "today";
+    tabToday.setAttribute("aria-selected", String(today));
+    tabStats.setAttribute("aria-selected", String(!today));
+    document.getElementById("todayView").style.display = today ? "" : "none";
+    document.getElementById("statsView").style.display = today ? "none" : "";
+    if (!today) renderStats();
+  }
+  tabToday.addEventListener("click", function () { showTab("today"); });
+  tabStats.addEventListener("click", function () { showTab("stats"); });
+
+  Array.prototype.forEach.call(document.querySelectorAll(".range-btn"), function (btn) {
+    btn.addEventListener("click", function () {
+      statsRange = parseInt(btn.getAttribute("data-range"), 10);
+      Array.prototype.forEach.call(document.querySelectorAll(".range-btn"), function (b) {
+        b.setAttribute("aria-pressed", String(b === btn));
+      });
+      renderStats();
+    });
+  });
+
+  /* ---------- Copy log ---------- */
+
+  document.getElementById("copyBtn").addEventListener("click", function () {
+    var cfg = MODES[mode];
+    var d = new Date();
+    var modeName = mode === "surge" ? "Surge" : mode === "sunday" ? "Sunday Reset" : "Weekday";
+    var lines = ["One Lever (" + modeName + ") — " + d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })];
+    cfg.blocks.forEach(function (b, bi) {
+      if (b.check) lines.push((state[b.check] ? "[x]" : "[ ]") + " " + (b.checkLabel || b.name));
+      var fv = flexVals[mode + ":" + bi];
+      if (b.flex && fv) lines.push("    Flex block: " + fv);
+    });
+    var won = cfg.game.wonWhen.every(function (k) { return state[k]; });
+    lines.push("Day " + (won ? "WON" : "not won yet"));
+    var doneR = ritualState.filter(Boolean).length;
+    lines.push((mode === "surge" ? "Surge rules read: " : "Shutdown ritual: ") + doneR + "/" + cfg.ritual.length);
+    lines.push("Week: " + DAYS.map(function (dd, i) {
+      return dd + ":" + (weekState[i] === "won" ? "W" : weekState[i] === "partial" ? "P" : "-");
+    }).join(" "));
+    var text = lines.join("\n");
+    var btn = this;
+    function ok() { btn.textContent = "Copied ✓"; setTimeout(function () { btn.textContent = "Copy today's log"; }, 1600); }
+    function fallbackCopy(t) {
+      var ta = document.createElement("textarea");
+      ta.value = t; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(ok, function () { fallbackCopy(text); ok(); });
+    } else { fallbackCopy(text); ok(); }
+  });
+
+  // Restore saved history on startup (device storage first)
+  if (hasLS) {
+    try {
+      var savedTxt = window.localStorage.getItem(LS_KEY);
+      if (savedTxt) absorbLog(JSON.parse(savedTxt));
+    } catch (e) { /* corrupt save — start fresh, import still available */ }
+  }
+
+  render();
+
+  // Install the offline shell
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+    navigator.serviceWorker.register("sw.js").catch(function () {});
+  }
+})();
+</script>
+</body>
+</html>
